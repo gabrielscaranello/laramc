@@ -1,0 +1,70 @@
+#! /bin/bash
+
+model="$1"
+params="$2"
+valid=false
+
+### SHOW HELP
+show_help() {
+        echo "Usage: laramc [ModelName] [options]"
+        echo "       laramc User -m"
+        echo ""
+        echo "       laramc Product -msa"
+        echo "       Create a Product model with seeders and your API controller"
+        echo ""
+        echo "Notes "
+        echo "       All model classes must follow CamelCase nomenclature and be created in English."
+        echo ""
+        echo "Options"
+
+        echo "       -h      - Show this message"
+        echo "       -a      - Create resource API controller"
+        echo "       -c      - Create model class"
+        echo "       -f      - Create factory"
+        echo "       -s      - Create seeder"
+        echo "       -m      - Create model class with migration"
+        echo "       -w      - Create web controller"
+        echo ""
+        valid=true
+}
+
+
+### CHECK IF NEED CREATE MODEL, CONTROLLER, SEEDER OR FACTORY
+if [[ $params =~ [-] ]] && [[ $params =~ [MmCcWwAaSsFf] ]]; then
+
+    if [[ $params =~ [Mm] ]] && [[ $params =~ [Cc] ]] || [[ $params =~ [Mm] ]]; then
+        php artisan make:model Models/"$model" -m
+    elif [[ $params =~ [Cc] ]]; then
+        php artisan make:model Models/"$model"
+    fi
+
+    if [[ $params =~ [Ww] ]]; then
+        php artisan make:controller Site/"$model"Controller --model=Models/"$model"
+    fi
+
+    if [[ $params =~ [Aa] ]]; then
+        php artisan make:controller Api/"$model"Controller -r --model=Models/"$model" --api
+    fi
+
+    if [[ $params =~ [Ss] ]]; then
+        php artisan make:seeder "$model"TableSeeder
+    fi
+
+    if [[ $params =~ [Ff] ]]; then
+        php artisan make:factory "$model"Factory
+    fi
+    valid=true
+
+fi
+
+### CHECK IF SHOW HELP
+if [[ $1 == '-h' ]] || [[ $1 == '-H' ]]; then
+    show_help
+fi
+
+### CHECK IF HAVE A VALID ARGS
+if [ $valid == false ]; then
+    echo "Invalid Arguments"
+    echo ""
+    show_help
+fi
